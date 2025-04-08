@@ -32,7 +32,7 @@ The environment packs these essential tools:
 
 Jump in with:
 
-1. Clone this repo or create a new directory
+1. Clone this repo
 
 ```sh
 git clone https://github.com/barstoolbluz/postgres-metabase && cd postgres-metabase
