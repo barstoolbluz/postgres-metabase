@@ -1,1 +1,0 @@
-/home/daedalus/dev/github/postgres-metabase/.flox/run/x86_64-linux.postgres-metabase.dev/bin/postgres "-D" "/home/daedalus/dev/github/postgres-metabase/.flox/cache/postgres/data" "-c" "unix_socket_directories=/home/daedalus/dev/github/postgres-metabase/.flox/cache/postgres/run" "-c" "listen_addresses=127.0.0.1" "-p" "15432"
