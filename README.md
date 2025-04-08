@@ -1,0 +1,176 @@
+# 🐘 A Flox Environment for PostgreSQL with Metabase
+
+This Flox environment provides wizard-driven setup for PostgreSQL database development with integrated Metabase analytics. The environment automates configuration, service management, and provides helper utilities.
+
+## ✨ Features
+
+- Wizard-driven configuration of PostgreSQL with the option to use built-in defaults
+- Built-in Metabase integration for data visualization and analytics
+- Service management for both PostgreSQL and Metabase
+- Sample data loading with Iowa liquor sales dataset
+- Cross-platform compatibility (macOS, Linux)
+
+## 🧰 Included Tools
+
+The environment packs these essential tools:
+
+- `postgresql` - Powerful open-source relational database (PostgreSQL 16 by default)
+- `postgis` - Spatial and geographic objects for PostgreSQL
+- `metabase` - Open-source business intelligence and analytics platform
+- `gum` - Terminal UI toolkit powering the setup wizard and styling
+- `bash` - Shell for script execution (explicitly included for Fish shell compatibility)
+- `curl` - Used to fetch this README.md, helper-function scripts, and database loading scripts.
+
+## 🏁 Getting Started
+
+### 📋 Prerequisites
+
+- [Flox](https://flox.dev/get) installed on your system
+
+### 💻 Installation & Activation
+
+Jump in with:
+
+1. Clone this repo or create a new directory
+
+```sh
+git clone https://github.com/barstoolbluz/postgres-metabase && cd postgres-metabase
+```
+
+2. Run:
+
+```sh
+flox activate -s
+```
+
+This command:
+- Pulls in all dependencies
+- Detects any existing PostgreSQL configuration
+- Fires up the configuration wizard if needed
+- Starts the `postgres` and `metabase` services 
+
+### 🧙 Setup Wizard
+
+First-time activation triggers a wizard that:
+
+1. Looks for existing PostgreSQL configuration in `$FLOX_ENV_CACHE/postgres.config`
+2. Kicks off a wizard you can use to customize PostgreSQL if no config is found
+3. Saves this config for future use
+
+## 📝 Usage
+
+After setup, you have access to these commands:
+
+```bash
+# Connect to PostgreSQL
+psql
+
+# Reconfigure PostgreSQL
+pgconfigure
+
+# Service Management
+flox services start postgres     # Start PostgreSQL
+flox services stop postgres      # Stop PostgreSQL
+flox services restart postgres   # Restart PostgreSQL
+flox services restart metabase   # Restart Metabase
+
+# Built-in Functions
+readme                           # Shows this README.md using bat
+info                             # Shows the welcome message
+fetch                            # Fetches the Iowa liquor sales dataset
+populate                         # Populates the PostgreSQL database with this dataset
+```
+
+## 🔍 How It Works
+
+### 🔄 Configuration Management
+
+The environment implements a multi-tiered config strategy:
+
+1. **Existing Environment Variables**: Uses PostgreSQL environment variables if available
+2. **PostgreSQL Config File**: Reads from `postgres.config` if present
+3. **Interactive Configuration**: Prompts for configuration details if no valid config is found
+
+We store config files in the following path:
+- The directory specified by `DEFAULT_PGDIR` environment variable (if set)
+- The directory specified by `PGDIR` environment variable (if set)
+- The environment's cache (`$FLOX_ENV_CACHE`); this is the default
+
+### 🐚 Shell Integration
+
+The environment includes shell integration for multiple shells:
+- Bash
+- Zsh
+- Fish
+
+### 📊 Database & Analytics Integration
+
+The environment provides:
+- PostgreSQL database with your choice of version (10-16)
+- PostGIS extension for geographical data
+- Metabase for data visualization and analytics:
+  - Runs on localhost:3000 by default
+  - Automatically configures for connections to your PostgreSQL instance
+
+### 📂 Sample Data Loading
+
+The environment includes scripts to fetch and load sample data:
+
+1. **Iowa Liquor Sales Dataset**:
+   - Use the `fetch` command to download the Iowa liquor sales dataset
+   - The file is saved to `$HOME/.cache/flox/downloads/postgres_sample.sql` by default
+   - The download includes a progress spinner and size display
+   - Use the `populate` command to create and populate the `iowa_liquor_sales` database
+   - The populate script:
+     - Creates the database if it doesn't exist
+     - Creates the necessary table structure
+     - Imports the data from the CSV
+     - Converts date strings to proper DATE types
+     - Creates indexes for better query performance
+
+This sample dataset is perfect for exploring the PostgreSQL + Metabase integration, allowing you to visualize liquor sales data through Metabase's dashboards and analytics tools.
+
+## 🔧 Troubleshooting
+
+If you encounter issues:
+
+1. **Connection fails**: 
+   - Verify your PostgreSQL server is running with `flox services status postgres`
+   - Check your connection details in the PostgreSQL configuration
+   
+2. **Configuration issues**:
+   - Run `pgconfigure` to reset and reconfigure your PostgreSQL instance
+   - Check that your data directories have proper permissions
+
+3. **Service startup problems**: 
+   - Ensure ports aren't already in use by other services
+   - Check logs with `journalctl` or system logging tools
+
+4. **Dataset loading issues**:
+   - If the `fetch` command fails, check your internet connection
+   - Ensure you have sufficient disk space for the dataset
+   - If the `populate` command fails, verify that PostgreSQL is running
+   - Check permissions on the downloaded CSV file
+
+## 💻 System Compatibility
+
+This works on:
+- macOS (ARM64, x86_64)
+- Linux (ARM64, x86_64)
+
+## 🔒 Security Considerations
+
+- PostgreSQL configuration is stored with limited permissions
+- Passwords are masked in the terminal UI during configuration
+- Socket directories have 700 permissions for secure access
+- Be mindful that connection details are stored in configuration files in your environment
+
+## About Flox
+
+[Flox](https://flox.dev/docs) combines package and environment management, building on [Nix](https://github.com/NixOS/nix). It gives you Nix with a `git`-like syntax and an intuitive UX:
+
+- **Declarative environments**. Software packages, variables, services, etc. are defined in simple, human-readable TOML format;
+- **Content-addressed storage**. Multiple versions of packages with conflicting dependencies can coexist in the same environment;
+- **Reproducibility**. The same environment can be reused across development, CI, and production;
+- **Deterministic builds**. The same inputs always produce identical outputs for a given architecture, regardless of when or where builds occur;
+- **World's largest collection of packages**. Access to over 150,000 packages—and millions of package-version combinations—from [Nixpkgs](https://github.com/NixOS/nixpkgs).
