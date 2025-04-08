@@ -38,7 +38,17 @@ Jump in with:
 git clone https://github.com/barstoolbluz/postgres-metabase && cd postgres-metabase
 ```
 
-2. Run:
+OR
+
+2. Get the latest version of this environment from FloxHub
+
+```sh
+flox activate -r barstoolbluz/postgres-metabase
+```
+
+THEN
+
+3. Run:
 
 ```sh
 flox activate -s
