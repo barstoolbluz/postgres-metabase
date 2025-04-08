@@ -19,8 +19,9 @@ The environment packs these essential tools:
 - `metabase` - Open-source business intelligence and analytics platform
 - `gum` - Terminal UI toolkit powering the setup wizard and styling
 - `bash` - Shell for script execution (explicitly included for Fish shell compatibility)
-- `curl` - Used to fetch this README.md, helper-function scripts, and database loading scripts.
-
+- `curl` - Used to fetch this `README.md`, helper-function scripts, and database loading scripts.
+- `bat` - Used to show this `README.md`
+  
 ## 🏁 Getting Started
 
 ### 📋 Prerequisites
@@ -43,7 +44,7 @@ git clone https://github.com/barstoolbluz/postgres-metabase && cd postgres-metab
 flox activate -s
 ```
 
-This command:
+Either method:
 - Pulls in all dependencies
 - Detects any existing PostgreSQL configuration
 - Fires up the configuration wizard if needed
@@ -79,13 +80,14 @@ readme                           # Shows this README.md using bat
 info                             # Shows the welcome message
 fetch                            # Fetches the Iowa liquor sales dataset
 populate                         # Populates the PostgreSQL database with this dataset
+pgconfigure                      # Reconfigure PostgreSQL database as needed
 ```
 
 ## 🔍 How It Works
 
 ### 🔄 Configuration Management
 
-The environment implements a multi-tiered config strategy:
+Our environment implements a multi-tiered config strategy:
 
 1. **Existing Environment Variables**: Uses PostgreSQL environment variables if available
 2. **PostgreSQL Config File**: Reads from `postgres.config` if present
@@ -98,14 +100,14 @@ We store config files in the following path:
 
 ### 🐚 Shell Integration
 
-The environment includes shell integration for multiple shells:
+Our environment includes shell integration for multiple shells:
 - Bash
 - Zsh
 - Fish
 
 ### 📊 Database & Analytics Integration
 
-The environment provides:
+Our environment provides:
 - PostgreSQL database with your choice of version (10-16)
 - PostGIS extension for geographical data
 - Metabase for data visualization and analytics:
@@ -114,7 +116,7 @@ The environment provides:
 
 ### 📂 Sample Data Loading
 
-The environment includes scripts to fetch and load sample data:
+Our environment includes scripts to fetch and load sample data:
 
 1. **Iowa Liquor Sales Dataset**:
    - Use the `fetch` command to download the Iowa liquor sales dataset
@@ -136,6 +138,7 @@ If you encounter issues:
 
 1. **Connection fails**: 
    - Verify your PostgreSQL server is running with `flox services status postgres`
+   - Check the logs of your PostgreSQL service with `flox services logs postgres`
    - Check your connection details in the PostgreSQL configuration
    
 2. **Configuration issues**:
@@ -144,26 +147,19 @@ If you encounter issues:
 
 3. **Service startup problems**: 
    - Ensure ports aren't already in use by other services
-   - Check logs with `journalctl` or system logging tools
+   - Running `flox services logs postgres` could help with this
 
 4. **Dataset loading issues**:
-   - If the `fetch` command fails, check your internet connection
-   - Ensure you have sufficient disk space for the dataset
+   - If the `fetch` command fails, check your internet connection?
+   - Make you have sufficient disk space (~7.1GB) for the dataset
    - If the `populate` command fails, verify that PostgreSQL is running
-   - Check permissions on the downloaded CSV file
+   - Check permissions on the downloaded CSV file?
 
 ## 💻 System Compatibility
 
-This works on:
+Our environment works on:
 - macOS (ARM64, x86_64)
 - Linux (ARM64, x86_64)
-
-## 🔒 Security Considerations
-
-- PostgreSQL configuration is stored with limited permissions
-- Passwords are masked in the terminal UI during configuration
-- Socket directories have 700 permissions for secure access
-- Be mindful that connection details are stored in configuration files in your environment
 
 ## About Flox
 
