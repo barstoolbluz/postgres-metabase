@@ -25,7 +25,7 @@ readme() {
 # fetch fetch.sh
 fetch() {
     local FETCH_SCRIPT="${RESOURCES_DIR}/fetch.sh"
-    [[ -f "$FETCH_SCRIPT" ]] && bash -i "$FETCH_SCRIPT" "$@" >/dev/null 2>&1 || true
+    [[ -f "$FETCH_SCRIPT" ]] && bash -i "$FETCH_SCRIPT" "$@" || true
 }
 
 # show default help message
