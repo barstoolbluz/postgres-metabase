@@ -8,7 +8,7 @@
 DB_USER="pguser"
 DB_PASS="pgpass"
 DB_NAME="iowa_liquor_sales"
-CSV_FILE="$FLOX_ENV_PROJECT/iowa_liquor_sales.csv"
+CSV_FILE="./iowa_liquor_sales.csv"
 
 # Check if CSV file exists
 if [ ! -f "$CSV_FILE" ]; then
@@ -115,6 +115,89 @@ if [ $? -eq 0 ]; then
     echo "============================================"
     echo "  Database population completed successfully!"
     echo "============================================"
+    
+    # Create a temporary file for unit test queries
+    TEST_SQL_FILE=$(mktemp)
+    
+    # Generate unit test queries
+    cat > "$TEST_SQL_FILE" << 'EOF'
+-- Unit Tests for Iowa Liquor Sales Database
+
+\echo '\n[TEST 1] Counting total records:'
+SELECT COUNT(*) AS total_records FROM iowa_liquor_sales;
+
+\echo '\n[TEST 2] Verifying date conversion:'
+SELECT 
+    MIN(date) AS earliest_date,
+    MAX(date) AS latest_date,
+    COUNT(DISTINCT date) AS unique_dates
+FROM iowa_liquor_sales;
+
+\echo '\n[TEST 3] Checking top 5 counties by sales volume:'
+SELECT 
+    county,
+    SUM(sale_dollars) AS total_sales,
+    SUM(bottles_sold) AS total_bottles,
+    COUNT(DISTINCT store_number) AS num_stores
+FROM iowa_liquor_sales
+GROUP BY county
+ORDER BY total_sales DESC
+LIMIT 5;
+
+\echo '\n[TEST 4] Verifying vendor data integrity:'
+SELECT 
+    COUNT(*) AS total_vendors,
+    COUNT(DISTINCT vendor_name) AS unique_vendor_names
+FROM (
+    SELECT DISTINCT vendor_number, vendor_name
+    FROM iowa_liquor_sales
+) AS vendors;
+
+\echo '\n[TEST 5] Checking for any NULL values in critical columns:'
+SELECT
+    SUM(CASE WHEN invoice_item_number IS NULL THEN 1 ELSE 0 END) AS null_invoice_items,
+    SUM(CASE WHEN date IS NULL THEN 1 ELSE 0 END) AS null_dates,
+    SUM(CASE WHEN store_number IS NULL THEN 1 ELSE 0 END) AS null_store_numbers,
+    SUM(CASE WHEN item_number IS NULL THEN 1 ELSE 0 END) AS null_item_numbers,
+    SUM(CASE WHEN sale_dollars IS NULL THEN 1 ELSE 0 END) AS null_sale_dollars
+FROM iowa_liquor_sales;
+
+\echo '\n[TEST 6] Verifying price calculations:'
+SELECT
+    (AVG(state_bottle_retail) > AVG(state_bottle_cost)) AS retail_greater_than_cost,
+    AVG(state_bottle_retail) AS avg_retail,
+    AVG(state_bottle_cost) AS avg_cost,
+    AVG(state_bottle_retail - state_bottle_cost) AS avg_markup
+FROM iowa_liquor_sales;
+
+\echo '\n[TEST 7] Testing index performance (should be fast):'
+EXPLAIN ANALYZE SELECT * FROM iowa_liquor_sales WHERE county = 'POLK' AND date BETWEEN '2021-01-01' AND '2021-12-31';
+
+\echo '\n[TEST 8] Sample data (first 5 rows):'
+SELECT 
+    invoice_item_number,
+    date,
+    store_name,
+    city,
+    county,
+    item_description,
+    bottles_sold,
+    sale_dollars
+FROM iowa_liquor_sales
+LIMIT 5;
+EOF
+
+    # Run the tests
+    echo ""
+    echo "Running database validation tests..."
+    echo "============================================"
+    export PGPASSWORD="$DB_PASS"
+    psql -U "$DB_USER" -d "$DB_NAME" -f "$TEST_SQL_FILE"
+    echo "============================================"
+    echo "Tests completed. Check the results above to verify data integrity."
+    
+    # Clean up test file
+    rm "$TEST_SQL_FILE"
 else
     echo "============================================"
     echo "  Error: Database population failed!"
