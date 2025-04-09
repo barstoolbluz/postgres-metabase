@@ -12,7 +12,7 @@ This Flox environment provides wizard-driven setup for PostgreSQL database devel
 
 ## 🧰 Included Tools
 
-The environment packs these essential tools:
+These tools are _declared_, not actually installed. They're downloaded to and materialized on your system when you activate the environment.
 
 - `postgresql` - Powerful open-source relational database (PostgreSQL 16 by default)
 - `metabase` - Open-source business intelligence and analytics platform
@@ -21,6 +21,8 @@ The environment packs these essential tools:
 - `bash` - For cross-shell and cross-platform compatibility
 - `curl` - Used to fetch this `README.md`, helper-function scripts, and database loading scripts.
 - `bat` - Used to show this `README.md`
+
+You can add or remove tools at anytime with `flox install <pkg>` / `flox remove <pkg>`, or edit the `[install]` section in the Flox environment's manifest using `flox edit`.
   
 ## 🏁 Getting Started
 
