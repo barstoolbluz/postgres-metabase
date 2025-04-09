@@ -20,6 +20,7 @@ gum.pkg-path = "gum"
 bash.pkg-path = "bash"
 coreutils.pkg-path = "coreutils" # just in case on macos/darwin
 curl.pkg-path = "curl"
+bat.pkg-path = "bat"
 
 [vars]
 # define postgresql env vars available at runtime
