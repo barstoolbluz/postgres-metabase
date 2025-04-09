@@ -37,10 +37,10 @@ MB_JETTY_HOST="0.0.0.0"
 MB_JETTY_PORT="3000"
 
 # github repo for this environment
-HELPER_FUNCTIONS_REPO="https://raw.githubusercontent.com/barstoolbluz/postgres-metabase/.flox/cache/helper-functions"
+HELPER_FUNCTIONS_REPO="https://raw.githubusercontent.com/barstoolbluz/main/postgres-metabase/.flox/cache/helper-functions"
 README_PATH="${FLOX_ENV_PROJECT}/README.md"
 README_URL="https://raw.githubusercontent.com/barstoolbluz/postgres-metabase/main/README.md"
-RESOURCES_REPO="https://raw.githubusercontent.com/barstoolbluz/postgres-metabase/.flox/cache/resources"
+RESOURCES_REPO="https://raw.githubusercontent.com/barstoolbluz/main/postgres-metabase/.flox/cache/resources"
 
 [hook]
 on-activate = '''
