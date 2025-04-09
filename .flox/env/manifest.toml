@@ -20,7 +20,6 @@ gum.pkg-path = "gum"
 bash.pkg-path = "bash"
 coreutils.pkg-path = "coreutils" # just in case on macos/darwin
 curl.pkg-path = "curl"
-bat.pkg-path = "bat"
 
 [vars]
 # define postgresql env vars available at runtime
@@ -35,12 +34,6 @@ MB_ANON_TRACKING_ENABLED="true"
 MB_CHECK_FOR_UPDATES="true"
 MB_JETTY_HOST="0.0.0.0"
 MB_JETTY_PORT="3000"
-
-# github repo for this environment
-HELPER_FUNCTIONS_REPO="https://raw.githubusercontent.com/barstoolbluz/main/postgres-metabase/.flox/cache/helper-functions"
-README_PATH="${FLOX_ENV_PROJECT}/README.md"
-README_URL="https://raw.githubusercontent.com/barstoolbluz/postgres-metabase/main/README.md"
-RESOURCES_REPO="https://raw.githubusercontent.com/barstoolbluz/main/postgres-metabase/.flox/cache/resources"
 
 [hook]
 on-activate = '''
@@ -58,14 +51,23 @@ export HELPER_FUNCTIONS_DIR="${FLOX_ENV_CACHE}/helper-functions"
 # enable/disable debugging; set to "true" to enable verbose output
 export PG_DEBUG="false"
 
-# Create helper functions directory
+# create if not exists helper functions dir
 mkdir -p "$HELPER_FUNCTIONS_DIR"
 
-# Define resources directory
+# define resources dir
 export RESOURCES_DIR="${FLOX_ENV_CACHE}/resources"
 mkdir -p "$RESOURCES_DIR"
 
-# this function downloads missing files
+# define github repo vars
+export GITHUB_REPO="barstoolbluz/postgres-metabase"
+export GITHUB_BRANCH="main"
+export RAW_GITHUB_BASE="https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}"
+export HELPER_FUNCTIONS_PATH="${RAW_GITHUB_BASE}/.flox/cache/helper-functions"
+export RESOURCES_PATH="${RAW_GITHUB_BASE}/.flox/cache/resources"
+export README_PATH="${FLOX_ENV_PROJECT}/README.md"
+export README_URL="${RAW_GITHUB_BASE}/README.md"
+
+# download missing files
 download_if_missing() {
     local local_path="$1"
     local remote_url="$2"
@@ -74,9 +76,18 @@ download_if_missing() {
         mkdir -p "$(dirname "$local_path")"
         
         if command -v curl >/dev/null 2>&1; then
-            curl -s -o "$local_path" "$remote_url" >/dev/null 2>&1 || true
+            curl -s -o "$local_path" "$remote_url" >/dev/null 2>&1 || {
+                echo "Failed to download $remote_url"
+                return 1
+            }
         elif command -v wget >/dev/null 2>&1; then
-            wget -q -O "$local_path" "$remote_url" >/dev/null 2>&1 || true
+            wget -q -O "$local_path" "$remote_url" >/dev/null 2>&1 || {
+                echo "Failed to download $remote_url"
+                return 1
+            }
+        else
+            echo "Neither curl nor wget found. Cannot download files."
+            return 1
         fi
         
         # Make script executable if it's a shell script
@@ -87,33 +98,51 @@ download_if_missing() {
 }
 
 # download helper function files if they don't exist
-for shell in bash zsh fish; do
-    case "$shell" in
-        bash|zsh)
-            ext="sh"
-            ;;
-        fish)
-            ext="fish"
-            ;;
-    esac
+download_helper_functions() {
+    local shell_types=("bash" "zsh" "fish")
     
-    filename="helper-functions-${shell}.${ext}"
-    download_if_missing "${HELPER_FUNCTIONS_DIR}/${filename}" "${HELPER_FUNCTIONS_REPO}/${filename}"
-done
-
-# Download pgconfigure.sh if it doesn't exist
-download_if_missing "${HELPER_FUNCTIONS_DIR}/pgconfigure.sh" "${HELPER_FUNCTIONS_REPO}/pgconfigure.sh"
+    for shell in "${shell_types[@]}"; do
+        case "$shell" in
+            bash|zsh)
+                ext="sh"
+                ;;
+            fish)
+                ext="fish"
+                ;;
+        esac
+        
+        local filename="helper-functions-${shell}.${ext}"
+        local local_path="${HELPER_FUNCTIONS_DIR}/${filename}"
+        local remote_url="${HELPER_FUNCTIONS_PATH}/${filename}"
+        
+        download_if_missing "$local_path" "$remote_url"
+    done
+    
+    # Download pgconfigure.sh
+    download_if_missing "${HELPER_FUNCTIONS_DIR}/pgconfigure.sh" "${HELPER_FUNCTIONS_PATH}/pgconfigure.sh"
+}
 
 # download README.md if it doesn't exist
-download_if_missing "$README_PATH" "$README_URL"
-
-# files that live in $FLOX_ENV_CACHE/resources/ to download
-resource_files=("fetch.sh" "populate-database.sh" "import.py" "create-schema.py" "schema.sql")
+download_readme() {
+    download_if_missing "$README_PATH" "$README_URL"
+}
 
 # download resource files if they don't exist
-for file in "${resource_files[@]}"; do
-    download_if_missing "${RESOURCES_DIR}/${file}" "${RESOURCES_REPO}/${file}"
-done
+download_resources() {
+    local resource_files=("fetch.sh" "populate-database.sh" "import.py" "schema-creation.py" "schema.sql")
+    
+    for file in "${resource_files[@]}"; do
+        download_if_missing "${RESOURCES_DIR}/${file}" "${RESOURCES_PATH}/${file}"
+    done
+}
+
+# main download them all
+download_all_files() {
+    # Download all needed files
+    download_helper_functions
+    download_readme
+    download_resources
+}
 
 # this function checks if first run
 check_first_run() {
@@ -217,7 +246,7 @@ update_dependent_vars() {
     debug_log "  PGHOST: $PGHOST"
 }
 
-# this function initializes postgres
+# init postgres
 initialize_postgres() {
     mkdir -p "$(dirname "$PGDATA")" && chmod 700 "$(dirname "$PGDATA")"
     rm -rf "$PGDATA" && mkdir -p "$PGDATA" && chmod 700 "$PGDATA"
@@ -231,7 +260,7 @@ initialize_postgres() {
     return $?
 }
 
-# this function creates config file if not exist
+# create postgresql.conf if not exist
 create_config_file() {
     echo "listen_addresses = '$PGHOSTADDR'
 port = $PGPORT
@@ -240,7 +269,7 @@ unix_socket_permissions = 0700" > "$PGDATA/postgresql.conf"
     return 0
 }
 
-# this function starts postgres
+# start postgres as part of bootstrapping config
 start_postgres() {
     # is $PGHOST an absolute path?
     if [[ ! "$PGHOST" = /* ]]; then
@@ -275,13 +304,13 @@ start_postgres() {
     return $?
 }
 
-# this function creates database if not exist
+# creates database if not exist
 create_database() {
     psql -lqt | cut -d \| -f 1 | grep -qw $PGDATABASE || createdb > /dev/null 2>&1
     return 0
 }
 
-# this function stops postgres
+# stop postgres as part of bootstrapping config
 stop_postgres() {
     if [[ "$PG_DEBUG" == "true" ]]; then
         pg_ctl -D "$PGDATA" -m fast -w stop
@@ -291,7 +320,7 @@ stop_postgres() {
     return $?
 }
 
-# we call this function from profile if we want/need to reconfigure postgres
+# we call this function from bash profile if we want/need to reconfigure postgres
 reconfigure_postgres() {
     rm -f "$CONFIG_FILE"
     first_run_setup
@@ -416,6 +445,8 @@ show_postgres_help() {
 main() {
     first_run_setup
     
+    download_all_files
+    
     postgres_setup
 
     show_postgres_help
@@ -425,17 +456,16 @@ main() {
 main
 '''
 
-
 [profile]
 common = '''
 export HELPER_FUNCTIONS_DIR="${FLOX_ENV_CACHE}/helper-functions"
 '''
 
 bash = '''
-# Source the postgres.config for environment variables
+# source the postgres.config for env vars
 source "${FLOX_ENV_CACHE}/postgres.config" 2>/dev/null || true
 
-# Source shell-specific helper functions
+# source shell-specific helper functions
 source "${HELPER_FUNCTIONS_DIR}/helper-functions-bash.sh" 2>/dev/null || true
 
 alias populate='bash "$FLOX_ENV_CACHE/resources/populate-database.sh" || true'
@@ -443,23 +473,25 @@ alias pgconfigure='bash "${HELPER_FUNCTIONS_DIR}/pgconfigure.sh"'
 '''
 
 zsh = '''
-# Source the postgres.config for environment variables
+# source the postgres.config for env vars
 source "${FLOX_ENV_CACHE}/postgres.config" 2>/dev/null || true
 
-# Source shell-specific helper functions
+# source shell-specific helper functions
 source "${HELPER_FUNCTIONS_DIR}/helper-functions-zsh.sh" 2>/dev/null || true
 
+# populate postgresql database
 populate() { bash "$FLOX_ENV_CACHE/resources/populate-database.sh" || true; }
 pgconfigure() { bash "${HELPER_FUNCTIONS_DIR}/pgconfigure.sh"; }
 '''
 
 fish = '''
-# Source the postgres.config for environment variables
+# source the postgres.config for env vars
 source "$FLOX_ENV_CACHE/postgres.config" 2>/dev/null || true
 
-# Source shell-specific helper functions
+# source shell-specific helper functions
 source "$HELPER_FUNCTIONS_DIR/helper-functions-fish.fish" 2>/dev/null || true
 
+# populate postgresql database
 function populate; bash "$FLOX_ENV_CACHE/resources/populate-database.sh" || true; end
 function pgconfigure; bash "$HELPER_FUNCTIONS_DIR/pgconfigure.sh"; end
 '''
