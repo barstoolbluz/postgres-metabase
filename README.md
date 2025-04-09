@@ -18,7 +18,8 @@ The environment packs these essential tools:
 - `postgis` - Spatial and geographic objects for PostgreSQL
 - `metabase` - Open-source business intelligence and analytics platform
 - `gum` - Terminal UI toolkit powering the setup wizard and styling
-- `bash` - Shell for script execution (explicitly included for Fish shell compatibility)
+- `coreutils` - For macOS/Darwin compatibility
+- `bash` - For cross-shell and cross-platform compatibility
 - `curl` - Used to fetch this `README.md`, helper-function scripts, and database loading scripts.
 - `bat` - Used to show this `README.md`
   
