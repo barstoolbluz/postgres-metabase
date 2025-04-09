@@ -68,9 +68,23 @@ First-time activation triggers a wizard that:
 2. Kicks off a wizard you can use to customize PostgreSQL if no config is found
 3. Saves this config for future use
 
+> **Tip:** Type `readme` at any time to view this README.md in your terminal or IDE.
+
 ## 📝 Usage
 
-After setup, you have access to these commands:
+### 🗄️ Setting Up the Iowa Liquor Sales Database
+
+To create and work with the `iowa_liquor_sales` database:
+
+1. When the setup wizard appears during first-time activation, simply accept all the default options by selecting "No" when asked to customize your PostgreSQL configuration. This will automatically set up your database with the correct name.
+
+2. Once PostgreSQL is running, follow these steps to load the sample data:
+
+   - Run `fetch` to download the Iowa liquor sales dataset (note: this is a 7.1 GB file)
+   - Run `populate` to load data from the CSV into your PostgreSQL database
+   - The `populate` script includes built-in unit tests that run automatically to confirm the data loaded correctly
+
+### 🛠️ Available Commands
 
 ```bash
 # Connect to PostgreSQL
