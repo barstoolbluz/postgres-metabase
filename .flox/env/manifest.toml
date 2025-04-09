@@ -28,7 +28,7 @@ PGHOSTADDR = "127.0.0.1"
 PGPORT = "15432"
 PGUSER = "pguser"
 PGPASS = "pgpass"
-PGDATABASE = "postgres"
+PGDATABASE = "iowa_liquor_sales"
 
 # define metabase env vars available at runtime
 MB_ANON_TRACKING_ENABLED="true"
@@ -51,7 +51,7 @@ export DEFAULT_PGHOSTADDR="127.0.0.1"
 export DEFAULT_PGPORT="15432"
 export DEFAULT_PGUSER="pguser"
 export DEFAULT_PGPASS="pgpass"
-export DEFAULT_PGDATABASE="postgres"
+export DEFAULT_PGDATABASE="iowa_liquor_sales"
 export DEFAULT_PGDIR="${FLOX_ENV_CACHE}/postgres"
 export HELPER_FUNCTIONS_DIR="${FLOX_ENV_CACHE}/helper-functions"
 
