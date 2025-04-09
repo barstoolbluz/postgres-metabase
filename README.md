@@ -86,6 +86,8 @@ To create and work with the `iowa_liquor_sales` database:
    - Run `populate` to load data from the CSV into your PostgreSQL database
    - The `populate` script includes built-in unit tests that run automatically to confirm the data loaded correctly
 
+See **Sample Data Loading**, below, for more.
+
 ### 🛠️ Available Commands
 
 ```bash
