@@ -15,7 +15,6 @@ This Flox environment provides wizard-driven setup for PostgreSQL database devel
 The environment packs these essential tools:
 
 - `postgresql` - Powerful open-source relational database (PostgreSQL 16 by default)
-- `postgis` - Spatial and geographic objects for PostgreSQL
 - `metabase` - Open-source business intelligence and analytics platform
 - `gum` - Terminal UI toolkit powering the setup wizard and styling
 - `coreutils` - For macOS/Darwin compatibility
