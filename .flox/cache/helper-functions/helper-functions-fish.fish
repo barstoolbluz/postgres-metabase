@@ -26,9 +26,9 @@ end
 
 # fetch fetch.sh
 function fetch
-    set FETCH_SCRIPT "$RESOURCES_DIR/fetch.sh"
+    set -l FETCH_SCRIPT "$RESOURCES_DIR/fetch.sh"
     if test -f "$FETCH_SCRIPT"
-        bash -i "$FETCH_SCRIPT" $argv >/dev/null 2>&1 || true
+        bash -i "$FETCH_SCRIPT" $argv
     end
 end
 
